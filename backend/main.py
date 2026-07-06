@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-
+from database import sessionLocal
 # Import models so SQLAlchemy knows what tables to create.
 from models import History  
 from database import Base, engine
@@ -20,15 +20,15 @@ def about():
 class calculation(BaseModel):
     expression: str
     result: float
-    operation:str
+
 
 @app.post('/calculate')
 def calculate(data: calculation):
-    print(data.expression)
-    print(data.result)
-    print(data.operation)
-    h=History(data.expression,data.result)
-    return {"expression": data.expression, 
-            "result": data.result,
-            "operation":data.operation,
-            "status":"success"}
+    db=sessionLocal()
+    h=History(expression=data.expression,result=data.result)
+    try:
+      db.add(h)
+      db.commit()
+    finally:
+     db.close()
+    return {"message":"Done successfully"}

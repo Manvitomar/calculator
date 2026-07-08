@@ -8,3 +8,7 @@
 # This is mainly used when your application sends cookies or authentication tokens.
 # For our calculator, it isn't essential yet, but it's common to include it.
 # We'll understand it properly when we build login and authentication.
+backend/venv/
+__pycache__/
+*.pyc
+.env

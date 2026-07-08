@@ -4,15 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="calculator-container">
-        <div class="calculator-title">Calculator</div>
+        <div class="calculator-header">
+            <span class="calculator-title">Calculator</span>
+            <span class="calculator-mode">STD</span>
+        </div>
+
         <div class="display">
             <div class="previous-operand" data-previous-operand></div>
             <div class="current-operand" data-current-operand>0</div>
         </div>
+
         <div class="buttons-grid">
             <button class="special" data-all-clear>AC</button>
             <button class="special" data-delete>DEL</button>
@@ -34,11 +41,15 @@
             <button data-number>.</button>
             <button class="equals" data-equals>=</button>
         </div>
-    </div>
-    <h2>History</h2>
 
-<div id="history"></div>
-    
+        <div class="history-section">
+            <div class="history-heading">
+                <h2>History</h2>
+            </div>
+            <div id="history"></div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

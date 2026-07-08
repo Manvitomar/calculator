@@ -28,7 +28,7 @@ class Calculator {
     }
 
     chooseOperation(operation) {
-        if (this.currentOperand === '0') return;
+        if (this.currentOperand === '0' && this.previousOperand === '') return;
         if (this.previousOperand !== '') {
             this.compute();
         }
@@ -42,8 +42,7 @@ class Calculator {
         const prev = parseFloat(this.previousOperand);
         const current = parseFloat(this.currentOperand);
 
-        if (isNaN(prev))
-            return;
+        if (isNaN(prev)) return;
         const expression = `${this.previousOperand} ${this.operation} ${this.currentOperand}`;
 
         switch (this.operation) {
@@ -57,7 +56,7 @@ class Calculator {
                 computation = prev * current;
                 break;
             case '÷':
-                computation = prev / current;
+                computation = current === 0 ? NaN : prev / current;
                 break;
             case '%':
                 computation = prev % current;
@@ -106,9 +105,10 @@ document.querySelectorAll('[data-operation]').forEach(button => {
     });
 });
 
-document.querySelector('[data-equals]').addEventListener('click', () => {
+document.querySelector('[data-equals]').addEventListener('click', async () => {
     calculator.compute();
     calculator.updateDisplay();
+    await history_data();
 });
 
 document.querySelector('[data-all-clear]').addEventListener('click', () => {
@@ -163,32 +163,34 @@ document.addEventListener('keydown', event => {
         calculator.updateDisplay();
     }
 });
+
 async function history_data() {
+    // Load history from the backend and render it into the history panel.
     try {
-        const response = await fetch("http://127.0.0.1:8000/history")
-        const history = await response.json()
-        console.log(history)
+        const response = await fetch("http://127.0.0.1:8000/history");
+        const history = await response.json();
         const historyContainer = document.getElementById("history");
         historyContainer.innerHTML = "";
         history.forEach(item => {
-            historyContainer.innerHTML += `<div class=history-item">
-        <span>${item.expression}=${item.result}</span>
-        <button onclick=delete_history(${item.id})">🗑️</button>
-        </div>`;
+            historyContainer.innerHTML += `
+<div class="history-item">
+    <span>${item.expression} = ${item.result}</span>
+    <button onclick="delete_history(${item.id})">🗑</button>
+</div>`;
         });
     } catch (error) {
-        console.error(error);
+        console.error("Could not load history:", error);
     }
 }
+
 async function delete_history(id) {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/history/${id}`, {
+        await fetch(`http://127.0.0.1:8000/history/${id}`, {
             method: "DELETE"
         });
         await history_data();
-    }
-    catch (error) {
-        console.error(error)
+    } catch (error) {
+        console.error("Could not delete history item:", error);
     }
 }
 
@@ -205,18 +207,17 @@ async function saveCalculation(expression, result) {
             })
         });
 
-        const data = await response.json();
-        alert("saved");
+        await response.json();
         await history_data();
-        // console.log("Saved Successfully:", data);
-
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Could not save calculation:", error);
     }
 }
 
-// fectch() sends an HTTP request and returns a promise.
-// promise:promise is basically a reciept not the actual data.m
+// fetch() sends an HTTP request and returns a promise (a receipt, not the data itself).
+// async/await let this code pause at each request until the backend responds.
 
-// async function:means this function will perform work that takes time.
-// await:now js says that i will wait here until the backend replies..
+// Load any existing history as soon as the page opens.
+window.addEventListener('load', () => {
+    history_data();
+});

@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from crud import save_cal,get_history,delete_history
+from crud import save_cal, get_history, delete_history
 from database import sessionLocal
 # Import models so SQLAlchemy knows what tables to create.
-from models import History  
+from models import History
 from database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
 
+# Create tables on startup (will NOT alter existing tables)
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
 app.add_middleware(

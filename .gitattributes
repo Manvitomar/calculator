@@ -1,2 +1,10 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# CORS:Cross-Origin Resource Sharing
+# origin--->protocol + domain + port
+# different port=different origin
+
+# allow_credentials=True
+# This is mainly used when your application sends cookies or authentication tokens.
+# For our calculator, it isn't essential yet, but it's common to include it.
+# We'll understand it properly when we build login and authentication.

@@ -1,12 +1,24 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from crud import save_cal,get_history,delete_history
 from database import sessionLocal
 # Import models so SQLAlchemy knows what tables to create.
 from models import History  
 from database import Base, engine
+from fastapi.middleware.cors import CORSMiddleware
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/catalog")
 def home():
     return {"message": "Welcome to the Calculator API!"}
@@ -25,10 +37,32 @@ class calculation(BaseModel):
 @app.post('/calculate')
 def calculate(data: calculation):
     db=sessionLocal()
-    h=History(expression=data.expression,result=data.result)
     try:
-      db.add(h)
-      db.commit()
+      h=save_cal(db=db,expression=data.expression,result=data.result)
+      return {"message":"Done successfully","id":h.id}
+
     finally:
      db.close()
-    return {"message":"Done successfully"}
+
+@app.get('/history')
+def history():
+        # create a session object to connect to the database and perform operations. ...or... 
+        # a session is used to commuicate with the database.now the gate is open to communicate with the database and perform operations like insert, update, delete, and query.
+        db=sessionLocal()
+        try:
+         data=get_history(db=db)
+         return data
+        finally:
+         db.close()    
+
+@app.delete('/history/{id}')
+def remove_history(id:int):
+    db=sessionLocal()
+    try:
+       deleted=delete_history(db,id)
+       if deleted:
+           return {"message":"Record deleted successfully"}
+       else:
+           return {"message":"Record not found"}
+    finally:
+        db.close()

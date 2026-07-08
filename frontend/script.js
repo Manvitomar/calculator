@@ -41,9 +41,11 @@ class Calculator {
         let computation;
         const prev = parseFloat(this.previousOperand);
         const current = parseFloat(this.currentOperand);
+
         if (isNaN(prev))
-           return;
-        
+            return;
+        const expression = `${this.previousOperand} ${this.operation} ${this.currentOperand}`;
+
         switch (this.operation) {
             case '+':
                 computation = prev + current;
@@ -63,7 +65,7 @@ class Calculator {
             default:
                 return;
         }
-        
+        saveCalculation(expression, computation);
         this.currentOperand = computation.toString();
         this.operation = undefined;
         this.previousOperand = '';
@@ -78,7 +80,7 @@ class Calculator {
     updateDisplay() {
         this.currentOperandTextElement.innerText = this.currentOperand;
         if (this.operation != null) {
-            this.previousOperandTextElement.innerText = 
+            this.previousOperandTextElement.innerText =
                 `${this.previousOperand} ${this.operation}`;
         } else {
             this.previousOperandTextElement.innerText = '';
@@ -161,3 +163,60 @@ document.addEventListener('keydown', event => {
         calculator.updateDisplay();
     }
 });
+async function history_data() {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/history")
+        const history = await response.json()
+        console.log(history)
+        const historyContainer = document.getElementById("history");
+        historyContainer.innerHTML = "";
+        history.forEach(item => {
+            historyContainer.innerHTML += `<div class=history-item">
+        <span>${item.expression}=${item.result}</span>
+        <button onclick=delete_history(${item.id})">🗑️</button>
+        </div>`;
+        });
+    } catch (error) {
+        console.error(error);
+    }
+}
+async function delete_history(id) {
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/history/${id}`, {
+            method: "DELETE"
+        });
+        await history_data();
+    }
+    catch (error) {
+        console.error(error)
+    }
+}
+
+async function saveCalculation(expression, result) {
+    try {
+        const response = await fetch("http://127.0.0.1:8000/calculate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                expression: expression,
+                result: result
+            })
+        });
+
+        const data = await response.json();
+        alert("saved");
+        await history_data();
+        // console.log("Saved Successfully:", data);
+
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+// fectch() sends an HTTP request and returns a promise.
+// promise:promise is basically a reciept not the actual data.m
+
+// async function:means this function will perform work that takes time.
+// await:now js says that i will wait here until the backend replies..

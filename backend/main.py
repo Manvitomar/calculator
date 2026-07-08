@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pathlib import Path
 from crud import save_cal, get_history, delete_history
 from database import sessionLocal
 # Import models so SQLAlchemy knows what tables to create.
@@ -10,19 +13,27 @@ from fastapi.middleware.cors import CORSMiddleware
 # Create tables on startup (will NOT alter existing tables)
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+app.mount(
+    "/static",
+    StaticFiles(directory=BASE_DIR / "frontend"),
+    name="static"
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500"
-    ],
+   allow_origins=[
+    "http://127.0.0.1:5500",
+    "http://localhost:5500",
+    "https://calculator-eta-bice.vercel.app"
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-@app.get("/catalog")
-def home():
-    return {"message": "Welcome to the Calculator API!"}
+@app.get("/")
+def root():
+    return FileResponse(BASE_DIR / "frontend" / "index.html")
 @app.get("/about")
 def about():
     return {"project":"calculator",

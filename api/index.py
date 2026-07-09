@@ -23,15 +23,13 @@ app.mount(
 app.add_middleware(
     CORSMiddleware,
    allow_origins=[
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-    "https://calculator-eta-bice.vercel.app"
+    "*"
 ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-@app.get("/")
+@app.get("/catalog")
 def root():
     return FileResponse(BASE_DIR / "frontend" / "index.html")
 @app.get("/about")
@@ -45,6 +43,14 @@ class calculation(BaseModel):
     expression: str
     result: float
 
+class login(BaseModel):
+     name:str
+     email:str
+     password:str
+
+@app.get('/login')
+def login():
+    return {"message":"welcome to login page"}    
 
 @app.post('/calculate')
 def calculate(data: calculation):

@@ -167,7 +167,7 @@ document.addEventListener('keydown', event => {
 async function history_data() {
     // Load history from the backend and render it into the history panel.
     try {
-        const response = await fetch("http://127.0.0.1:8000/history");
+        const response = await fetch("api/history");
         const history = await response.json();
         const historyContainer = document.getElementById("history");
         historyContainer.innerHTML = "";
@@ -185,7 +185,7 @@ async function history_data() {
 
 async function delete_history(id) {
     try {
-        await fetch(`http://127.0.0.1:8000/history/${id}`, {
+        await fetch(`api/history/${id}`, {
             method: "DELETE"
         });
         await history_data();
@@ -196,7 +196,7 @@ async function delete_history(id) {
 
 async function saveCalculation(expression, result) {
     try {
-        const response = await fetch("http://127.0.0.1:8000/calculate", {
+        const response = await fetch("api/calculate", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

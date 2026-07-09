@@ -11,5 +11,13 @@ class History(Base):
    result=Column(Float)
    created_at=Column(DateTime,default=datetime.now)
 
+class User(Base):
+   
+   __tablename__="users"
+   id=Column(Integer,primary_key=True,index=True)
+   name=Column(String(100),nullable=False)
+   email=Column(String(100),unique=True,nullable=False)
+   password=Column(String(255),nullable=False)
+   created_at=Column(DateTime,default=datetime.now)
   #  each object of the history class will become the row in the history table.
   # what is session:session is the temporary connection blw your python code and the database.

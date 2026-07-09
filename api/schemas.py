@@ -5,4 +5,3 @@ class UserCreate(BaseModel):
   email:EmailStr
   password:str
 
-  # schemas

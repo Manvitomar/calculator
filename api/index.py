@@ -3,12 +3,13 @@ from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
-from crud import save_cal, get_history, delete_history
+from crud import save_cal, get_history, delete_history,user_info
 from database import sessionLocal
 # Import models so SQLAlchemy knows what tables to create.
 from models import History
 from database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
+from schemas import UserCreate
 
 # Create tables on startup (will NOT alter existing tables)
 Base.metadata.create_all(bind=engine)
@@ -43,15 +44,16 @@ class calculation(BaseModel):
     expression: str
     result: float
 
-class login(BaseModel):
-     name:str
-     email:str
-     password:str
 
-@app.get('/login')
-def login():
-    return {"message":"welcome to login page"}    
-
+@app.post('/register')
+def register(user:UserCreate):
+    db=sessionLocal()
+    try:
+       h=user_info(db=db,name=user.name,email=user.email,password=user.password)
+       return {"message":"welcome to login page"}    
+    finally:
+       db.close()
+    
 @app.post('/calculate')
 def calculate(data: calculation):
     db=sessionLocal()

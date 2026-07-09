@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import History
+from models import History,User
 
 def save_cal(db:Session,expression:str,result:float):
     h=History(expression=expression,result=result)
@@ -19,5 +19,13 @@ def delete_history(db:Session,id:int):
         return None
     db.delete(h)
     db.commit()
+
+    return h
+
+def user_info(db:Session,name:str,email:str,password:str):
+    new_user=User(name=name,email=email,password=password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
 
     return h

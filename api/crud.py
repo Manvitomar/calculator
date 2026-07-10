@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from models import History,User
+from auth import hash_password
 
 def save_cal(db:Session,expression:str,result:float):
     h=History(expression=expression,result=result)
@@ -21,11 +22,21 @@ def delete_history(db:Session,id:int):
     db.commit()
 
     return h
-
-def user_info(db:Session,name:str,email:str,password:str):
-    new_user=User(name=name,email=email,password=password)
+def create_user(db:Session,name:str,email:str,password:str):
+    hashed_pass=hash_password(password)
+    new_user=User(name=name,email=email,password=hashed_pass)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
-    return h
+    return new_user
+
+def verify_user(db:Session, email:str):
+    # normalize for safer matching (prevents whitespace/case issues)
+    if email is None:
+        return None
+    normalized_email = email.strip()
+    user = db.query(User).filter(User.email == normalized_email).first()
+    return user
+
+   

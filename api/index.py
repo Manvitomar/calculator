@@ -1,15 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path
-from crud import save_cal, get_history, delete_history,user_info
+from crud import save_cal, get_history, delete_history,create_user,verify_user
 from database import sessionLocal
 # Import models so SQLAlchemy knows what tables to create.
 from models import History
 from database import Base, engine
 from fastapi.middleware.cors import CORSMiddleware
-from schemas import UserCreate
+from schemas import UserCreate,UserLogin
+from auth import verify_password
 
 # Create tables on startup (will NOT alter existing tables)
 Base.metadata.create_all(bind=engine)
@@ -46,14 +48,33 @@ class calculation(BaseModel):
 
 
 @app.post('/register')
-def register(user:UserCreate):
-    db=sessionLocal()
+def register(user: UserCreate):
+    db = sessionLocal()
     try:
-       h=user_info(db=db,name=user.name,email=user.email,password=user.password)
-       return {"message":"welcome to login page"}    
+        return create_user(db=db, name=user.name, email=user.email, password=user.password)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
-       db.close()
-    
+        db.close()
+
+@app.post('/login')
+def login(user:UserLogin):
+    db=sessionLocal()
+
+    db_user=verify_user(db=db,email=user.email)
+    if db_user is None:
+        return {
+            "message":"Invalid Email"
+        }
+    if not verify_password(user.password, db_user.password):
+         return {
+             "message":"Invalid Password"
+         }
+    db.close()
+    return {
+        "message":"Login Successful"
+    }
+
 @app.post('/calculate')
 def calculate(data: calculation):
     db=sessionLocal()
